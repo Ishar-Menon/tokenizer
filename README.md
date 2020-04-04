@@ -1,1 +1,1 @@
-# token-zor
+# Decentralized product sale website.
