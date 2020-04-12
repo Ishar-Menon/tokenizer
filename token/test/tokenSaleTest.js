@@ -1,155 +1,127 @@
-var zorToken = artifacts.require("./zorToken.sol");
-var tokenSale = artifacts.require("./tokenSale.sol");
+var zorToken = artifacts.require('zorToken.sol');
+var tokenSale = artifacts.require('tokenSale.sol');
 
-contract("tokenSale", function(accounts) {
-  var tokenInstance;
-  var tokenSaleInstance;
+contract('tokenSale', function (accounts) {
+  var tokenPrice = 1000000000000000; // 0.001 Ether
   var admin = accounts[0];
   var buyer = accounts[1];
-  var tokenPrice = 1000000000000000; // in wei
   var tokensAvailable = 750000;
-  var numberOfTokens;
 
-  it("initializes the contract with the correct values", function() {
-    return tokenSale
-      .deployed()
-      .then(function(instance) {
-        tokenSaleInstance = instance;
-        return tokenSaleInstance.address;
-      })
-      .then(function(address) {
-        assert.notEqual(address, 0x0, "has contract address");
-        return tokenSaleInstance.tokenContract();
-      })
-      .then(function(address) {
-        assert.notEqual(address, 0x0, "has token contract address");
-        return tokenSaleInstance.tokenPrice();
-      })
-      .then(function(price) {
-        assert.equal(price, tokenPrice, "token price is correct");
-      });
+  it('initializes the contract with the correct values', async function () {
+    var tokenSaleInstance = await tokenSale.deployed();
+
+    // testing if the contract exists
+    var address = await tokenSaleInstance.address;
+    assert.notEqual(address, '0x0', 'has contract address');
+
+    // testing if the token contract function is working
+    var tokenContractAddress = await tokenSaleInstance.tokenContract();
+    assert.notEqual(address, '0x0', 'has token contract address');
+
+    // testing the token price
+    var price = await tokenSaleInstance.tokenPrice();
+    assert.equal(price, tokenPrice, 'token price is correct');
   });
 
-  it("facilitates token buying", function() {
-    return zorToken
-      .deployed()
-      .then(function(instance) {
-        // Grab token instance first
-        tokenInstance = instance;
-        return tokenSale.deployed();
-      })
-      .then(function(instance) {
-        // Then grab token sale instance
-        tokenSaleInstance = instance;
-        // Provision 75% of all tokens to the token sale
-        return tokenInstance.transfer(
-          tokenSaleInstance.address,
-          tokensAvailable,
-          { from: admin }
-        );
-      })
-      .then(function(receipt) {
-        numberOfTokens = 10;
-        return tokenSaleInstance.buyTokens(numberOfTokens, {
+  it('facilitates buting tokens', async function () {
+    var tokenInstance = await zorToken.deployed();
+    var tokenSaleInstance = await tokenSale.deployed();
+
+    // provision tokens to token sale
+    var tokenSaleAddress = await tokenSaleInstance.address;
+    await tokenInstance.transfer(tokenSaleAddress, tokensAvailable, {
+      from: admin,
+    });
+
+    var numberOfTokens = 10;
+    var value = numberOfTokens * tokenPrice;
+
+    // testing that the Sell event has been emitted
+    var receipt = await tokenSaleInstance.buyTokens(numberOfTokens, {
+      from: buyer,
+      value: value,
+    });
+    assert.equal(receipt.logs.length, 1, 'triggers one event');
+    assert.equal(receipt.logs[0].event, 'Sell', 'should be the "Sell" event');
+    assert.equal(
+      receipt.logs[0].args._buyer,
+      buyer,
+      'logs the account that purchased the token'
+    );
+    assert.equal(
+      receipt.logs[0].args._amount,
+      numberOfTokens,
+      'logs the amount of tokens purchased'
+    );
+
+    // testing the tokensSold function
+    var tokensSold = await tokenSaleInstance.tokensSold();
+    assert.equal(
+      tokensSold.toNumber(),
+      numberOfTokens,
+      'increments the number of tokens sold'
+    );
+
+    // testing the balance of the buyer and the token sale contract
+    var buyerBalance = await tokenInstance.balanceOf(buyer);
+    assert.equal(
+      buyerBalance.toNumber(),
+      numberOfTokens,
+      'increments tokens for the buyer'
+    );
+    var tokenSaleBalance = await tokenInstance.balanceOf(tokenSaleAddress);
+    assert.equal(
+      tokenSaleBalance.toNumber(),
+      tokensAvailable - numberOfTokens,
+      'deducts tokens from the token sale contract'
+    );
+
+    // testing that the value is equal to the number of tokens
+    try {
+      assert.fail(
+        await tokenSaleInstance.buyTokens(numberOfTokens, {
           from: buyer,
-          value: numberOfTokens * tokenPrice
-        });
-      })
-      .then(function(receipt) {
-        assert.equal(receipt.logs.length, 1, "triggers one event");
-        assert.equal(
-          receipt.logs[0].event,
-          "Sell",
-          'should be the "Sell" event'
-        );
-        assert.equal(
-          receipt.logs[0].args._buyer,
-          buyer,
-          "logs the account that purchased the tokens"
-        );
-        assert.equal(
-          receipt.logs[0].args._amount,
-          numberOfTokens,
-          "logs the number of tokens purchased"
-        );
-        return tokenSaleInstance.tokensSold();
-      })
-      .then(function(amount) {
-        assert.equal(
-          amount.toNumber(),
-          numberOfTokens,
-          "increments the number of tokens sold"
-        );
-        return tokenInstance.balanceOf(buyer);
-      })
-      .then(function(balance) {
-        assert.equal(balance.toNumber(), numberOfTokens);
-        return tokenInstance.balanceOf(tokenSaleInstance.address);
-      })
-      .then(function(balance) {
-        assert.equal(balance.toNumber(), tokensAvailable - numberOfTokens);
-        // Try to buy tokens different from the ether value
-        return tokenSaleInstance.buyTokens(numberOfTokens, {
-          from: buyer,
-          value: 1
-        });
-      })
-      .then(assert.fail)
-      .catch(function(error) {
-        assert(
-          error.message.indexOf("revert") >= 0,
-          "msg.value must equal number of tokens in wei"
-        );
-        return tokenSaleInstance.buyTokens(800000, {
-          from: buyer,
-          value: numberOfTokens * tokenPrice
-        });
-      })
-      .then(assert.fail)
-      .catch(function(error) {
-        assert(
-          error.message.indexOf("revert") >= 0,
-          "cannot purchase more tokens than available"
-        );
-      });
+          value: 1,
+        })
+      );
+    } catch (error) {
+      assert(
+        error.message.indexOf('revert') >= 0,
+        'msg.value must equal number of tokens in wei'
+      );
+    }
+
+    // testing for buying tokens more than that provisioned to the crowd sale
+    try {
+      assert.fail(
+        await tokenSaleInstance.buyTokens(800000, { from: buyer, value: value })
+      );
+    } catch (error) {
+      assert(
+        error.message.indexOf('revert') >= 0,
+        'cannot buy more tokens than provisioned'
+      );
+    }
   });
 
-  it("ends token sale", function() {
-    return zorToken
-      .deployed()
-      .then(function(instance) {
-        // Grab token instance first
-        tokenInstance = instance;
-        return tokenSale.deployed();
-      })
-      .then(function(instance) {
-        // Then grab token sale instance
-        tokenSaleInstance = instance;
-        // Try to end sale from account other than the admin
-        return tokenSaleInstance.endSale({ from: buyer });
-      })
-      .then(assert.fail)
-      .catch(function(error) {
-        assert(
-          error.message.indexOf("revert" >= 0, "must be admin to end sale")
-        );
-        // End sale as admin
-        return tokenSaleInstance.endSale({ from: admin });
-      })
-      .then(function(receipt) {
-        return tokenInstance.balanceOf(admin);
-      })
-      .then(function(balance) {
-        assert.equal(
-          balance.toNumber(),
-          999990,
-          "returns all unsold dapp tokens to admin"
-        );
-        // Check that the contract has no balance
-        return web3.eth.getBalance(tokenSaleInstance.address);
-      })
-      .then(function(balance) {
-        assert.equal(balance, 0);
-      });
+  it('ends token sale', async function () {
+    var tokenInstance = await zorToken.deployed();
+    var tokenSaleInstance = await tokenSale.deployed();
+
+    // testing for endSale from invalid admin
+    try {
+      assert.fail(await tokenSaleInstance.endSale({ from: buyer }));
+    } catch (error) {
+      assert(error.message.indexOf('revert') >= 0, 'must be admin to end sale');
+    }
+
+    // testing to end sale from valid admin
+    await tokenSaleInstance.endSale({ from: admin });
+    var balance = await tokenInstance.balanceOf(admin);
+    assert.equal(
+      balance.toNumber(),
+      999990,
+      'returns all unsold tokens to admin'
+    );
   });
 });
