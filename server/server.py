@@ -3,160 +3,192 @@ from flask_cors import CORS
 from flask_jwt_simple import (
     JWTManager, jwt_required, create_jwt, get_jwt_identity
 )
+from flask import request
 import jwt
 import pymongo
+import bcrypt
+from time import time
+try:
+    from flask import _app_ctx_stack as ctx_stack
+except ImportError:
+    from flask import _request_ctx_stack as ctx_stack
+
+
+
+# Config (Rember to put in json file)
+config = {
+    "mongoURI": "mongodb://localhost:27017/",
+    "jwtSecret": "secretforjwttoken"
+}
+
 
 # Mongo client
-dbClient = pymongo.MongoClient("mongodb://localhost:27017/")
+dbClient = pymongo.MongoClient(config["mongoURI"])
 mongoDB = dbClient["token_sale"]
 userCollection = mongoDB["User"]
 productCollection = mongoDB["Product"]
 
-'''
-const user1 = {
-    id        : 1,
-    name      : 'John',
-    surname   : 'Doe',
-    email     : 'demo@appseed.us',
-    password  : 'demo'
-};
-
-const user2 = {
-    id        : 2,
-    name      : 'George',
-    surname   : 'Clooney',
-    email     : 'demo2@appseed.us',
-    password  : 'demo'
-};
-'''
-
-user1 = { 'id': 1, 'name' : 'John'  , 'surname' : 'Doe'     , 'email' : 'demo@appseed.us'   , 'password' : 'demo'  }
-user2 = { 'id': 2, 'name' : 'George', 'surname' : 'Clooney' , 'email' : 'demo2@appseed.us'  , 'password' : 'demo'  }
-
-Users = {
-    'demo@appseed.us'  : user1,
-    'demo2@appseed.us' : user2,
-}
 
 app = Flask(__name__)
 CORS(app)
 
-# Setup the Flask-JWT-Simple extension
-app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
-jwt = JWTManager(app)
 
-# Provide a method to create access tokens. The create_jwt()
-# function is used to actually generate the token
-@app.route('/api/users/login', methods=['POST', 'OPTIONS'])
+@app.route('/api/user/login', methods=['POST', 'OPTIONS'])
 def login():
 
-    #username = 'demo@appseed.us'
-    #password = 'demo'
-
-    #user = {'_id': 1, "email": 'demo@appseed.us', 'name' : "John", 'surname' : "Doe", "token" : create_jwt(identity=username) } 
-    #ret  = {'user': user }
-
-    #return jsonify(ret), 200
-
-    ###########################################################
-    #if not request.is_json:
-    #    return jsonify({'errors': {'general' : 'format error (expected JSON)' }}), 400
-
-    username = None
-    password = None
+    if not request.is_json:
+        return jsonify({'errors': {'general': 'format error (expected JSON)'}}), 400
 
     try:
         params = request.get_json()
 
-        username = params['user']['email']
-        password = params['user']['password']
-    
+        email = params['email']
+        password = params['password']
+
+        # Check if user exist
+        user = userCollection.find_one({"email": email})
+        if(user == None):
+            return jsonify({'errors': {'general': 'User does not exist'}}), 400
+
+        # verify password
+        if(not bcrypt.checkpw(password.encode(), user["password"])):
+            return jsonify({'errors': {'general': 'Wrong email or password'}}), 400
+
+        # Generate token
+        token = jwt.encode({'email': email, 'exp': time() + 36000},
+                           config["jwtSecret"], algorithm='HS256')
+
+        return jsonify({"token": token}), 200
+
     # catch JSON format and missing keys (email / password)
-    except:
-        return jsonify({'errors': {'general' : 'Format error ' }}), 400
-
-    if not username in Users:
-        return jsonify({'errors': {'email' : 'User or email doesn\'t exist' }}), 400
-
-    user = Users[ username ] # aka email
-
-    if not password or password != user['password'] :
-        return jsonify({'errors': {'password' : 'Password is invalid' }}), 400 
-
-    # inject token
-    user["token"] = create_jwt(identity=username)
-    
-    # build response
-    ret  = { 'user': user }
-
-    # All good, return response
-    return jsonify(ret), 200
-
-# Protect a view with jwt_required, which requires a valid jwt
-# to be present in the headers.
-@app.route('/protected', methods=['GET'])
-@jwt_required
-def protected():
-    # Access the identity of the current user with get_jwt_identity
-    return jsonify({'hello_from': get_jwt_identity()}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'errors': {'general': 'Please provide both email and password'}}), 400
 
 
-# ----------------------------------------------------------------------- 
+# -----------------------------------------------------------------------
+#                       Middleware
+
+
+def auth(fn):
+    def wrapper(*args, **kwargs):
+        try:
+            token = request.headers.get('x-auth-token')
+            payload = jwt.decode(
+                token, config["jwtSecret"], algorithms=['HS256'])
+            ctx_stack.top.jwtPayload = payload
+        except Exception as e:
+            print(e)
+            return jsonify({'errors': {'general': 'Invalid token'}}), 400
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+# -----------------------------------------------------------------------
 #                       Database setup and routes
 
-#   User is of 2 types : 1.Buyer 2.Seller  
-#   Email used as unique identification for user 
-#   User schema : { 
+#   User is of 2 types : 1.Buyer 2.Seller
+#   Email used as unique identification for user
+#   User schema : {
 #               name : "Name"
-#               email: "Email"
+#               email: "Email",
+#               "password" : "messi"
 #               Eth_wallet_id:"Wallet id"
 #               tokens_bought: "No of tokens bought"
 #               role : "Buyer/Seller"
 #                  }
 #  Product schema : {
 #                   product_name : "name",
-#                   totalTokens : "total number of tokens for this product",               
+#                   totalTokens : "total number of tokens for this product",
 #                   tokenPrice : "Price of each token"
 #                   productOwner : "Seller"
 #                   productImages : ["base64ImageString"]
-# 
+#
 #               }
 
 def db_init():
-    # Check if the required collection exist  
+    # Check if the required collection exist
     # if not create it
-    
+
     element = userCollection.find_one()
     if(not element):
-        # Add dummy user 
-        user = {"name":"John Doe",
-                "email":"johndoe@example.com",
-                "Eth_wallet_id" : "xxxxxx",
-                "tokens_bought" : 0,
-                "role" : "Buyer"}
+        # Add dummy user
+        user = {"username": "John Doe",
+                "email": "johndoe@example.com",
+                "password": "messi",
+                "Eth_wallet_id": "xxxxxx",
+                "tokens_bought": 0,
+                "role": "Buyer"}
         userCollection.insert_one(user)
-    else:
-        print(element)
-    
+
     element = productCollection.find_one()
     if(not element):
-        # Add dummy product 
-        product = {"product_name":"name",
-                "totalTokens": 0,
-                "tokenPrice" : 0,
-                "productOwner" : "emailOfOwner",
-                "productImages" : ["image 1","Image 2"]
-                }
+        # Add dummy product
+        product = {"product_name": "name",
+                   "totalTokens": 0,
+                   "tokenPrice": 0,
+                   "productOwner": "emailOfOwner",
+                   "productDescription": "dummy product",
+                   "productImages": ["image 1", "Image 2"]
+                   }
         productCollection.insert_one(product)
-    else:
-        print(element)
+
+# -----------------------------------------------------------------------
+#                       User routes
+
 
 @app.route('/user/create', methods=['POST'])
 def createUser():
-    pass
+
+    if not request.is_json:
+        return jsonify({'errors': {'general': 'format error (expected JSON)'}}), 400
+
+    username = email = password = None
+
+    try:
+        params = request.get_json()
+        username = params["username"]
+        password = bcrypt.hashpw(params["password"].encode(), bcrypt.gensalt())
+        email = params["email"]
+        Eth_wallet_id = params["Eth_wallet_id"]
+        tokens_bought = 0
+        role = params["role"]
+
+        # Check if the user exist:
+        users = userCollection.find({"email": email})
+
+        if(users.count() != 0):
+            return jsonify({'errors': {'general': 'User with the same email already exist !'}}), 400
+
+        newUser = {"username": username,
+                   "password": password,
+                   "email": email,
+                   "Eth_wallet_id": Eth_wallet_id,
+                   "tokens_bought": 0,
+                   "role": role}
+    except:
+        return jsonify({'errors': {'general': 'Please provide all details'}}), 400
+
+    try:
+        userCollection.insert_one(newUser)
+    except:
+        return jsonify({'errors': {'general': 'Server error'}}), 500
+
+    return jsonify({'msg': 'user successfully created'}), 201
+
+
+@app.route('/user', methods=['GET'])
+@auth
+def getAllUsers():
+    try:
+        payload = ctx_stack.top.jwtPayload
+        print(payload)
+
+        return jsonify({"users": "somevalue"}), 200
+    except:
+        return jsonify({'errors': {'general': 'Server error'}}), 500
 
 
 if __name__ == '__main__':
     db_init()
-    # app.run(host='0.0.0.0', debug=True)
-    
+    app.run(host='0.0.0.0', debug=True)
