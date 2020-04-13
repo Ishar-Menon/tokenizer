@@ -1,0 +1,2 @@
+# Solidity detection
+*.sol linguist-language=Solidity
