@@ -48,10 +48,15 @@ def createUser():
 
     try:
         userCollection.insert_one(newUser)
+
+        # Generate token
+        token = jwt.encode({'email': email, 'exp': time() + 36000},
+                           "secretforjwttoken", algorithm='HS256').decode('utf-8')
+
     except:
         return jsonify({'errors': {'general': 'Server error'}}), 500
 
-    return jsonify({'msg': 'user successfully created'}), 201
+    return jsonify({"token": token}), 200
 
 
 @user_bp.route('/api/user/login', methods=['POST', 'OPTIONS'])
