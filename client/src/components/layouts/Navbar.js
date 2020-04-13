@@ -21,8 +21,8 @@ const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
       </li>
       <li>
         <Link to='#'>
-          <i className='fa fa-product-hunt'></i>
-          <span className='hide-sm'> Products</span>
+          <i className='fa fa-cart-arrow-down'></i>
+          <span className='hide-sm'> Token Sale</span>
         </Link>
       </li>
       <li>
