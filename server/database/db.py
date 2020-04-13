@@ -41,7 +41,7 @@ def db_init():
         # Add dummy user
         user = {"username": "John Doe",
                 "email": "johndoe@example.com",
-                "password": "messi",
+                "password": b"$2b$12$5OCxWciGMNhvnxmWweDYbuNjGS5yD51pEnuc3Pv1Ccif6MxgiIzzq",
                 "Eth_wallet_id": "xxxxxx",
                 "tokens_owned": [],
                 "role": "Buyer"}

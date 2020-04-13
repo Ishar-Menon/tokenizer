@@ -25,7 +25,7 @@ def createUser():
         params = request.get_json()
         username = params["username"]
         password = bcrypt.hashpw(
-            params["password"].encode('utf-8'), bcrypt.gensalt())
+            params["password"].encode(), bcrypt.gensalt())
         email = params["email"]
         Eth_wallet_id = params["Eth_wallet_id"]
         role = params["role"]
@@ -72,7 +72,7 @@ def login():
             return jsonify({'errors': {'general': 'User does not exist'}}), 400
 
         # verify password
-        if(not bcrypt.checkpw(password.encode('utf-8'), user["password"])):
+        if(not bcrypt.checkpw(password.encode(), user["password"])):
             return jsonify({'errors': {'general': 'Wrong email or password'}}), 400
 
         # Generate token
