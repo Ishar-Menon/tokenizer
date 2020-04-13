@@ -24,7 +24,8 @@ def createUser():
     try:
         params = request.get_json()
         username = params["username"]
-        password = bcrypt.hashpw(params["password"].encode(), bcrypt.gensalt())
+        password = bcrypt.hashpw(
+            params["password"].encode('utf-8'), bcrypt.gensalt())
         email = params["email"]
         Eth_wallet_id = params["Eth_wallet_id"]
         role = params["role"]
@@ -41,7 +42,8 @@ def createUser():
                    "Eth_wallet_id": Eth_wallet_id,
                    "tokens_owned": [],
                    "role": role}
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({'errors': {'general': 'Please provide all details'}}), 400
 
     try:
@@ -70,12 +72,12 @@ def login():
             return jsonify({'errors': {'general': 'User does not exist'}}), 400
 
         # verify password
-        if(not bcrypt.checkpw(password.encode(), user["password"])):
+        if(not bcrypt.checkpw(password.encode('utf-8'), user["password"])):
             return jsonify({'errors': {'general': 'Wrong email or password'}}), 400
 
         # Generate token
         token = jwt.encode({'email': email, 'exp': time() + 36000},
-                           "secretforjwttoken", algorithm='HS256')
+                           "secretforjwttoken", algorithm='HS256').decode('utf-8')
 
         return jsonify({"token": token}), 200
 
@@ -144,6 +146,10 @@ def getAllUsers():
         for user in users:
             user.pop("_id")
             userInfo["users"].append(user)
+            print(user)
+
+        for user in userInfo["users"]:
+            user["password"] = user["password"].decode('utf-8')
 
         return jsonify(userInfo), 200
     except Exception as e:
