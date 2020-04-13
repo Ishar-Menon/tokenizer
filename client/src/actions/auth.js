@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { setAlert } from './alert';
 import {
   USER_LOADED,
   AUTH_ERROR,
@@ -65,6 +66,10 @@ export const register = ({
 
     dispatch(loadUser());
   } catch (error) {
+    const errors = error.response.data.errors;
+
+    dispatch(setAlert(errors.general, 'danger'));
+
     dispatch({
       type: REGISTER_FAIL,
     });
@@ -90,6 +95,10 @@ export const login = (email, password) => async (dispatch) => {
 
     dispatch(loadUser());
   } catch (error) {
+    const errors = error.response.data.errors;
+
+    dispatch(setAlert(errors.general, 'danger'));
+
     dispatch({
       type: LOGIN_FAIL,
     });
