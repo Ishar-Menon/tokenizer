@@ -1,0 +1,12 @@
+version: "3"
+services:
+  flask_server:
+    container_name: flaskServer
+    restart: always
+    build: .
+    ports:
+      - "5000:5000"
+  mongo:
+    container_name: mongodb
+    restart: always
+    image: mongo
