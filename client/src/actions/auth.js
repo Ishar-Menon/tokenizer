@@ -11,6 +11,7 @@ import {
   CLEAR_USER_PRODUCT,
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
+import { loadUserProductsBought, loadUserProductsSold } from './userProducts';
 
 // Load user
 export const loadUser = () => async (dispatch) => {
@@ -67,6 +68,8 @@ export const register = ({
     });
 
     dispatch(loadUser());
+    // dispatch(loadUserProductsBought());
+    // dispatch(loadUserProductsSold());
   } catch (error) {
     const errors = error.response.data.errors;
 
@@ -96,6 +99,8 @@ export const login = (email, password) => async (dispatch) => {
     });
 
     dispatch(loadUser());
+    dispatch(loadUserProductsBought());
+    dispatch(loadUserProductsSold());
   } catch (error) {
     const errors = error.response.data.errors;
 

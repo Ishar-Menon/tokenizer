@@ -17,16 +17,10 @@ import BuyToken from './components/token/buyToken';
 import { Provider } from 'react-redux';
 import store from './store';
 import { loadUser } from './actions/auth';
-import {
-  loadUserProductsSold,
-  loadUserProductsBought,
-} from './actions/userProducts';
 
 function App() {
   useEffect(() => {
     store.dispatch(loadUser());
-    store.dispatch(loadUserProductsSold());
-    store.dispatch(loadUserProductsBought());
   }, []);
 
   return (

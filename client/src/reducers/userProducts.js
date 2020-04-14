@@ -4,6 +4,7 @@ import {
   USER_PRODUCT_BOUGHT_LOADED,
   USER_PRODUCT_BOUGHT_ERROR,
   CLEAR_USER_PRODUCT,
+  AUTH_ERROR,
 } from '../actions/types';
 
 const initialState = {
@@ -41,6 +42,7 @@ export default function (state = initialState, action) {
         productsBought: null,
       };
     case CLEAR_USER_PRODUCT:
+    case AUTH_ERROR:
       return {
         ...state,
         productsSold: null,
