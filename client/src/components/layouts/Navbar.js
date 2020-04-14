@@ -20,7 +20,7 @@ const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
         </Link>
       </li>
       <li>
-        <Link to='#'>
+        <Link to='/tokenSale'>
           <i className='fa fa-cart-arrow-down'></i>
           <span className='hide-sm'> Token Sale</span>
         </Link>

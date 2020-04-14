@@ -11,16 +11,22 @@ import Register from './components/auth/Register';
 import Login from './components/auth/Login';
 import ProductRegister from './components/products/productResgister';
 import Marketplace from './components/products/Marketplace';
-import BuyToken from './components/token/buyToken';
+import TokenSale from './components/token/TokenSale';
 
 // Redux
 import { Provider } from 'react-redux';
 import store from './store';
 import { loadUser } from './actions/auth';
+import {
+  loadUserProductsBought,
+  loadUserProductsSold,
+} from './actions/userProducts';
 
 function App() {
   useEffect(() => {
     store.dispatch(loadUser());
+    store.dispatch(loadUserProductsBought());
+    store.dispatch(loadUserProductsSold());
   }, []);
 
   return (
@@ -34,7 +40,7 @@ function App() {
             <Switch>
               <Route exact path='/register' component={Register} />
               <Route exact path='/login' component={Login} />
-              <PrivateRoute exact path='/buyToken' component={BuyToken} />
+              <PrivateRoute exact path='/tokenSale' component={TokenSale} />
               <PrivateRoute
                 exact
                 path='/product/register'

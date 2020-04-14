@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import tokenSaleABI from "../../ABI/tokenSale.json";
-import zorTokenABI from "../../ABI/zorToken.json";
-import TruffleContract from "truffle-contract";
-import Web3 from "web3";
+import React, { useState, useEffect } from 'react';
+import tokenSaleABI from '../../ABI/tokenSale.json';
+import zorTokenABI from '../../ABI/zorToken.json';
+import TruffleContract from 'truffle-contract';
+import Web3 from 'web3';
 
-export default function BuyToken() {
+const TokenSale = () => {
   const [contractInfo, setcontractInfoData] = useState({
-    account: "0x0",
+    account: '0x0',
   });
 
   const { account } = contractInfo;
@@ -28,7 +28,7 @@ export default function BuyToken() {
         tokenSale.setProvider(window.web3.currentProvider);
       } else {
         window.alert(
-          "Non-Ethereum browser detected. You should consider trying MetaMask!"
+          'Non-Ethereum browser detected. You should consider trying MetaMask!'
         );
       }
 
@@ -49,4 +49,6 @@ export default function BuyToken() {
     web3Setup();
   }, []);
   return <div></div>;
-}
+};
+
+export default TokenSale;
