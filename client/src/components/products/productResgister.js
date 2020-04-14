@@ -1,18 +1,18 @@
-import React, { Fragment, useState } from "react";
-import { Link, Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import { setAlert } from "../../actions/alert";
-import { createProduct } from "../../actions/product";
-import PropTypes from "prop-types";
-import axios from "axios";
+import React, { Fragment, useState } from 'react';
+import { Link, Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { setAlert } from '../../actions/alert';
+import { createProduct } from '../../actions/productRegister';
+import PropTypes from 'prop-types';
+import axios from 'axios';
 
 const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
   const [formData, setFormData] = useState({
-    product_name: "",
-    totalTokens: "",
-    tokenPrice: "",
-    shortDecription: "",
-    productDescription: "",
+    product_name: '',
+    totalTokens: '',
+    tokenPrice: '',
+    shortDescription: '',
+    productDescription: '',
     productImages: [],
   });
 
@@ -20,7 +20,7 @@ const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
     product_name,
     totalTokens,
     tokenPrice,
-    shortDecription,
+    shortDescription,
     productDescription,
     productImages,
   } = formData;
@@ -40,13 +40,13 @@ const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
     product_name,
     totalTokens,
     tokenPrice,
-    shortDecription,
+    shortDescription,
     productDescription,
     productImages
   ) => {
     const config = {
       headers: {
-        "Content-type": "application/json",
+        'Content-type': 'application/json',
       },
     };
 
@@ -55,13 +55,13 @@ const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
       product_name,
       totalTokens,
       tokenPrice,
-      shortDecription,
+      shortDescription,
       productDescription,
       productImages,
     });
 
     try {
-      const res = await axios.post("/api/product/create", body, config);
+      const res = await axios.post('/api/product/create', body, config);
 
       // dispatch({
       //   type: REGISTER_SUCCESS,
@@ -82,11 +82,12 @@ const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+
     createProduct(
       product_name,
       totalTokens,
       tokenPrice,
-      shortDecription,
+      shortDescription,
       productDescription,
       productImages
     );
@@ -116,7 +117,7 @@ const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
     <Fragment>
       <h1 className='large text-primary'>Product sign up</h1>
       <p className='lead'>
-        <i className='fa fa-bars'></i> register a new product for token sale
+        <i className='fa fa-bars'></i> Register a new product for token sale
       </p>
       <form className='form' onSubmit={(e) => onSubmit(e)}>
         <div className='form-group'>
@@ -150,14 +151,13 @@ const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
           <input
             type='text'
             placeholder='Short decription of the product'
-            name='shortDecription'
-            value={shortDecription}
+            name='shortDescription'
+            value={shortDescription}
             onChange={(e) => onChange(e)}
           />
         </div>
         <div className='form-group'>
-          <input
-            type='text'
+          <textarea
             placeholder='Detailed product Description'
             name='productDescription'
             value={productDescription}
@@ -187,7 +187,7 @@ ProductRegister.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  productCreated: state.product.productCreated,
+  productCreated: state.productRegister.productCreated,
 });
 
 export default connect(mapStateToProps, { createProduct, setAlert })(

@@ -25,7 +25,7 @@ def createProduct():
         product_name = params["product_name"]
         totalTokens = params["totalTokens"]
         tokenPrice = params["tokenPrice"]
-        shortDecription = params["shortDecription"]
+        shortDescription = params["shortDescription"]
         productDescription = params["productDescription"]
         productImages = params["productImages"]
 
@@ -40,7 +40,7 @@ def createProduct():
                       "totalTokens": totalTokens,
                       "tokenPrice": tokenPrice,
                       "productOwner": productOwner,
-                      "shortDecription": shortDecription,
+                      "shortDescription": shortDescription,
                       "productDescription": productDescription,
                       "productImages": productImages
                       }
@@ -90,23 +90,13 @@ def listProduct():
 @auth
 def listUsersProduct():
 
-    if not request.is_json:
-        return jsonify({'errors': {'general': 'format error (expected JSON)'}}), 400
-
     payload = ctx_stack.top.jwtPayload
     productOwner = payload["email"]
 
     try:
-        params = request.get_json()
-        skipAmount = params["skipAmount"]
-
-    except:
-        return jsonify({'errors': {'general': 'Please provide skip amount'}}), 400
-
-    try:
         products = productCollection.find(
             {"productOwner": productOwner}
-        ).skip(skipAmount).limit(10)
+        )
     except:
         return jsonify({'errors': {'general': 'Server error'}}), 500
 
