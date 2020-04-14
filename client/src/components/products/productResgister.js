@@ -2,10 +2,11 @@ import React, { Fragment, useState } from "react";
 import { Link, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { setAlert } from "../../actions/alert";
-import { register } from "../../actions/auth";
+import { createProduct } from "../../actions/product";
 import PropTypes from "prop-types";
+import axios from "axios";
 
-const ProductRegister = ({ register, setAlert, isAuthenticated }) => {
+const ProductRegister = ({ createProduct, setAlert, productCreated }) => {
   const [formData, setFormData] = useState({
     product_name: "",
     totalTokens: "",
@@ -21,31 +22,92 @@ const ProductRegister = ({ register, setAlert, isAuthenticated }) => {
     tokenPrice,
     shortDecription,
     productDescription,
+    productImages,
   } = formData;
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
 
-    // if (password !== password2) {
-    //   setAlert("Passwords do not match", "danger");
-    // } else {
-    //   register({ username, email, password, Eth_wallet_id });
-    // }
+  const uploadData = async (
+    product_name,
+    totalTokens,
+    tokenPrice,
+    shortDecription,
+    productDescription,
+    productImages
+  ) => {
+    const config = {
+      headers: {
+        "Content-type": "application/json",
+      },
+    };
+
+    console.log(productImages);
+    const body = JSON.stringify({
+      product_name,
+      totalTokens,
+      tokenPrice,
+      shortDecription,
+      productDescription,
+      productImages,
+    });
+
+    try {
+      const res = await axios.post("/api/product/create", body, config);
+
+      // dispatch({
+      //   type: REGISTER_SUCCESS,
+      //   payload: res.data,
+      // });
+
+      // dispatch(loadUser());
+    } catch (error) {
+      const errors = error.response.data.errors;
+
+      // dispatch(setAlert(errors.general, 'danger'));
+
+      // dispatch({
+      //   type: REGISTER_FAIL,
+      // });
+    }
   };
 
-  // Redirect
-  //   if (isAuthenticated) {
-  //     return <Redirect to='/dashboard' />;
-  //   }
+  const onSubmit = (e) => {
+    e.preventDefault();
+    createProduct(
+      product_name,
+      totalTokens,
+      tokenPrice,
+      shortDecription,
+      productDescription,
+      productImages
+    );
+  };
 
-  const fileUploadHandler = (event) => {
+  // Redirect;
+  if (productCreated) {
+    return <Redirect to='/dashboard' />;
+  }
+
+  const fileUploadHandler = async (event) => {
+    // Save context
     let filesArray = [];
-    for (var i = 0; i < event.target.files.length; i++) {
-      console.log(event.target.files[i]);
-      filesArray.push(event.target.files[i]);
+    let fileUploaded = event.target.files;
+    let length = fileUploaded.length;
+
+    let base64file = null;
+    for (var i = 0; i < length; i++) {
+      base64file = await toBase64(fileUploaded[i]);
+      console.log(base64file);
+      filesArray.push(base64file);
     }
     setFormData({ ...formData, productImages: filesArray });
   };
@@ -61,10 +123,9 @@ const ProductRegister = ({ register, setAlert, isAuthenticated }) => {
           <input
             type='text'
             placeholder='Product name'
-            name='productName'
+            name='product_name'
             value={product_name}
             onChange={(e) => onChange(e)}
-            // required
           />
         </div>
         <div className='form-group'>
@@ -121,14 +182,14 @@ const ProductRegister = ({ register, setAlert, isAuthenticated }) => {
 
 ProductRegister.propTypes = {
   setAlert: PropTypes.func.isRequired,
-  register: PropTypes.func.isRequired,
-  isAuthenticated: PropTypes.bool,
+  createProduct: PropTypes.func.isRequired,
+  productCreated: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({
-  isAuthenticated: state.auth.isAuthenticated,
+  productCreated: state.product.productCreated,
 });
 
-export default connect(mapStateToProps, { register, setAlert })(
+export default connect(mapStateToProps, { createProduct, setAlert })(
   ProductRegister
 );
