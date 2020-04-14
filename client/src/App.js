@@ -10,6 +10,7 @@ import Dashboard from "./components/layouts/Dashboard";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
 import ProductRegister from "./components/products/productResgister";
+import BuyToken from "./components/token/buyToken";
 
 // Redux
 import { Provider } from "react-redux";
@@ -32,6 +33,7 @@ function App() {
             <Switch>
               <Route exact path='/register' component={Register} />
               <Route exact path='/login' component={Login} />
+              <Route exact path='/buyToken' component={BuyToken} />
               <Route
                 exact
                 path='/product/register'

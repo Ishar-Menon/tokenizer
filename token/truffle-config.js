@@ -45,8 +45,8 @@ module.exports = {
     development: {
       host: "127.0.0.1", // Localhost (default: none)
       port: 7545, // Standard Ethereum port (default: none)
-      network_id: "*" // Any network (default: none)
-    }
+      network_id: "*", // Any network (default: none)
+    },
 
     // Another network with more advanced options...
     // advanced: {
@@ -76,7 +76,8 @@ module.exports = {
     // production: true    // Treats this network as if it was a public net. (default: false)
     // }
   },
-
+  contracts_directory: "../client/src/contracts",
+  contracts_build_directory: "../client/src/ABI",
   // Set default mocha options here, use special reporters etc.
   mocha: {
     // timeout: 100000
@@ -94,6 +95,6 @@ module.exports = {
       //  },
       //  evmVersion: "byzantium"
       // }
-    }
-  }
+    },
+  },
 };
