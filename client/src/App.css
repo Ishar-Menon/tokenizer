@@ -374,7 +374,6 @@ img {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  color: #17a2b8;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
   -ms-flex-direction: column;
@@ -385,12 +384,12 @@ img {
   align-items: center;
   text-align: center;
 }
-.dashboard .user-info .dash-links p {
-  cursor: pointer;
-}
 .dashboard .user-info .dash-links p:hover {
   color: #f4f4f4;
-  transition: ease;
+  cursor: pointer;
+}
+.dashboard .user-info .dash-links p {
+  color: #17a2b8;
 }
 .dashboard .user-products {
   display: -webkit-box;
@@ -457,6 +456,29 @@ img {
   font-size: 1.5rem;
   color: #343a40;
   width: 50%;
+}
+.tokenSale {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+.tokenSale .product-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  width: 40%;
+}
+.tokenSale .product-info img {
+  width: 250px;
+}
+.tokenSale .blockchain {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
 }
 .profile-grid {
   display: -ms-grid;

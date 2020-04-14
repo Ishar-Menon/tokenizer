@@ -23,7 +23,7 @@ contract('tokenSale', function (accounts) {
     assert.equal(price, tokenPrice, 'token price is correct');
   });
 
-  it('facilitates buting tokens', async function () {
+  it('facilitates buying tokens', async function () {
     var tokenInstance = await zorToken.deployed();
     var tokenSaleInstance = await tokenSale.deployed();
 
