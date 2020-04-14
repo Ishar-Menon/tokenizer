@@ -142,6 +142,30 @@ def buyTokens():
         return jsonify({'errors': {'general': 'Please provide all details'}}), 400
 
 
+@user_bp.route('/api/user/investProduct', methods=['GET'])
+@auth
+def listProduct():
+
+    payload = ctx_stack.top.jwtPayload
+    user = userCollection.find_one()
+    productInfo = {"products": []}
+    try:
+        user = userCollection.find_one({"email": payload["email"]})
+        print(user)
+        for product in user["tokens_owned"]:
+            elem = productCollection.find_one(
+                {"product_name": product["product_name"]})
+            elem.pop("_id")
+            print(product["product_name"])
+            productInfo["products"].append(elem)
+
+    except Exception as e:
+        print(e)
+        return jsonify({'errors': {'general': 'Server error'}}), 500
+
+    return jsonify(productInfo), 200
+
+
 # Testing route 1
 @user_bp.route('/user', methods=['GET'])
 def getAllUsers():
