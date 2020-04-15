@@ -3,6 +3,9 @@ import tokenSaleABI from '../../ABI/tokenSale.json';
 import zorTokenABI from '../../ABI/zorToken.json';
 import TruffleContract from 'truffle-contract';
 import Web3 from 'web3';
+import axios from 'axios';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -70,6 +73,7 @@ const TokenSale = () => {
       const accounts = await web3.eth.getAccounts();
       const temp_zorTokenInstance = await zorToken.deployed();
       const temp_tokenSaleInstance = await tokenSale.deployed();
+      // console.log(accounts);
 
       setContracts({
         zorTokenInstance: temp_zorTokenInstance,
@@ -103,6 +107,27 @@ const TokenSale = () => {
       from: account,
       value: noOfTokens * tokenPrice,
     });
+
+    try {
+      const config = {
+        headers: {
+          'Content-type': 'application/json',
+        },
+      };
+
+      const tempBought = parseInt(noOfTokens);
+
+      const body = {
+        tokensBought: {
+          product_name: 'Mona Lisa',
+          noTokensBought: tempBought,
+        },
+      };
+
+      const res = await axios.post('/api/user/buyTokens', body, config);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -155,4 +180,12 @@ const TokenSale = () => {
   );
 };
 
-export default TokenSale;
+// TokenSale.propTypes = {
+
+// }
+
+// const mapStateToProps = state => {
+
+// }
+
+export default connect()(TokenSale);

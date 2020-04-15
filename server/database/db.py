@@ -2,7 +2,7 @@ import pymongo
 
 
 # Mongo client
-dbClient = pymongo.MongoClient("mongodb://localhost:27017/")
+dbClient = pymongo.MongoClient("mongodb://mongo:27017/")
 mongoDB = dbClient["token_sale"]
 userCollection = mongoDB["User"]
 productCollection = mongoDB["Product"]

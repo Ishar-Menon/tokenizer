@@ -68,8 +68,8 @@ export const register = ({
     });
 
     dispatch(loadUser());
-    // dispatch(loadUserProductsBought());
-    // dispatch(loadUserProductsSold());
+    dispatch(loadUserProductsBought());
+    dispatch(loadUserProductsSold());
   } catch (error) {
     const errors = error.response.data.errors;
 

@@ -138,7 +138,8 @@ def buyTokens():
         userCollection.update_one({"email": payload["email"]}, newvalues)
 
         return jsonify({"msg": "successful update"}), 200
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({'errors': {'general': 'Please provide all details'}}), 400
 
 
