@@ -1,10 +1,10 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import { getProductData } from '../../actions/productList';
-import { setSelectedProductIndex } from '../../actions/productList';
-import { Link, Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { setAlert } from '../../actions/alert';
-import PropTypes from 'prop-types';
+import React, { Fragment, useState, useEffect } from "react";
+import { getProductData } from "../../actions/productList";
+import { setSelectedProductIndex } from "../../actions/productList";
+import { Link, Redirect } from "react-router-dom";
+import { connect } from "react-redux";
+import { setAlert } from "../../actions/alert";
+import PropTypes from "prop-types";
 
 const Marketplace = ({
   getProductData,
@@ -49,7 +49,7 @@ const Marketplace = ({
                 }}
               >
                 <img
-                  src='https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
+                  src={product.productImages[0]}
                   alt=''
                   className='round-img my-1'
                   title={counter.toString()}

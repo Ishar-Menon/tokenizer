@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "./Spinner";
@@ -65,6 +65,11 @@ const Dashboard = ({
             >
               Statistical Analysis
             </p>
+            <a href='/product/register'>
+              <p name='RegisterProduct' className='lead'>
+                Register Product
+              </p>
+            </a>
           </div>
         </div>
         {toggleLinks === 1 ? (
