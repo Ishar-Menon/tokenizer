@@ -27,7 +27,7 @@ function useInterval(callback, delay) {
   }, [delay]);
 }
 
-const TokenSale = () => {
+const TokenSale = ({ productList, productSelected, productSelectedIndex }) => {
   const [contractInfo, setcontractInfoData] = useState({
     account: '0x0',
   });
@@ -135,21 +135,23 @@ const TokenSale = () => {
       <h1 className='large text-primary'>Token Sale</h1>
       <div className='tokenSale'>
         <div className='product-info'>
-          <img
-            src='https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
-            alt=''
-            className='round-img my-1 hide-sm'
-          />
-
-          <small className='owner text-primary'>Owner: </small>
-          <p className='lead'>jdoe</p>
-          <small className='desc text-primary'>Description: </small>
-          <p className='desc'>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Amet
-            quidem sed, delectus quasi totam velit accusantium officiis saepe
-            quos fugit enim cupiditate tempore voluptatibus et voluptates,
-            libero illum inventore. Rem.
-          </p>
+          {productSelected && (
+            <Fragment>
+              <img
+                src={productList[productSelectedIndex].productImages[0]}
+                alt=''
+                className='round-img my-1 hide-sm'
+              />
+              <small className='owner text-primary'>Owner: </small>
+              <p className='lead'>
+                {productList[productSelectedIndex].productOwner}
+              </p>
+              <small className='desc text-primary'>Description: </small>
+              <p className='desc'>
+                {productList[productSelectedIndex].productDescription}
+              </p>
+            </Fragment>
+          )}
         </div>
         <div className='blockchain p-2'>
           <div className='tokens-info'>
@@ -180,12 +182,16 @@ const TokenSale = () => {
   );
 };
 
-// TokenSale.propTypes = {
+TokenSale.propTypes = {
+  productList: PropTypes.array.isRequired,
+  productSelected: PropTypes.bool,
+  productSelectedIndex: PropTypes.string,
+};
 
-// }
+const mapStateToProps = (state) => ({
+  productList: state.productList.productList.products,
+  productSelected: state.productList.productSelected,
+  productSelectedIndex: state.productList.productSelectedIndex,
+});
 
-// const mapStateToProps = state => {
-
-// }
-
-export default connect()(TokenSale);
+export default connect(mapStateToProps)(TokenSale);

@@ -1,10 +1,10 @@
-import React, { Fragment, useState, useEffect } from "react";
-import { getProductData } from "../../actions/productList";
-import { setSelectedProductIndex } from "../../actions/productList";
-import { Link, Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import { setAlert } from "../../actions/alert";
-import PropTypes from "prop-types";
+import React, { Fragment, useState, useEffect } from 'react';
+import { getProductData } from '../../actions/productList';
+import { setSelectedProductIndex } from '../../actions/productList';
+import { Link, Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { setAlert } from '../../actions/alert';
+import PropTypes from 'prop-types';
 
 const Marketplace = ({
   getProductData,
@@ -21,7 +21,7 @@ const Marketplace = ({
   });
 
   if (productList.productSelected) {
-    return <Redirect to='/dashboard' />;
+    return <Redirect to='/tokenSale' />;
   }
 
   const selectProduct = (event) => {
@@ -55,7 +55,7 @@ const Marketplace = ({
                   title={counter.toString()}
                 />
                 <div className='lead p-1' title={(counter++).toString()}>
-                  {product.shortDecription}
+                  {product.shortDescription}
                 </div>
               </div>
             ))}
