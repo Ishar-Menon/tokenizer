@@ -1,14 +1,20 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import Spinner from './Spinner';
+import React, { Fragment, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import Spinner from "./Spinner";
+import { unselectProduct } from "../../actions/productList";
 
 const Dashboard = ({
   auth: { user },
   userProducts: { productsSold, productsBought, loading },
+  unselectProduct,
 }) => {
   const [toggleLinks, setToggleLinks] = useState(0);
+
+  useEffect(() => {
+    unselectProduct();
+  });
 
   return loading ? (
     <Spinner />
@@ -112,6 +118,7 @@ const Dashboard = ({
 Dashboard.propTypes = {
   auth: PropTypes.object.isRequired,
   userProducts: PropTypes.object.isRequired,
+  unselectProduct: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -119,4 +126,4 @@ const mapStateToProps = (state) => ({
   userProducts: state.userProducts,
 });
 
-export default connect(mapStateToProps)(Dashboard);
+export default connect(mapStateToProps, { unselectProduct })(Dashboard);

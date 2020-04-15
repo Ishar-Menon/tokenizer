@@ -56,7 +56,7 @@ def createProduct():
 
 # List products with their information
 # (Inforamtion passed from client - items to skip)
-@product_bp.route('/api/product/list', methods=['GET'])
+@product_bp.route('/api/product/list', methods=['POST'])
 def listProduct():
 
     if not request.is_json:
